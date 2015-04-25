@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            input, button {
+                background: #666;
+                font-size: 35px;
+                font-weight: bold;
+                color: #ccc;
+                width: 50px;
+                height: 50px;
+                vertical-align: middle;
+            }
+        </style>
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+        <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+	    <script type="text/javascript">
+    var url = "{{ current_url }}";
+    var go_forward;
+    var go_nw;
+    var go_ne;
+    var go_left;
+    var stop;
+    var go_right;
+    var go_sw;
+    var go_backward;
+    var go_se;
+    var set_speed;
+    var uid = "{{ guid }}";
+
+    $(function() {
+        set_speed = $( "#slider" ).slider({
+            value: 40,
+            step: 5,
+            min: 0,
+            max: 100
+        })
+    });
+
+    go_nw = function(e) {
+        socket.send(JSON.stringify({
+            direction: "nw"
+        }));
+        return false;
+    };
+
+    go_forward = function(e) {
+        socket.send(JSON.stringify({
+            direction: "n"
+        }));
+        return false;
+    };
+
+    go_ne = function(e) {
+        socket.send(JSON.stringify({
+            direction: "ne"
+        }));
+        return false;
+    };
+
+    go_left = function(e) {
+        socket.send(JSON.stringify({
+            direction: "w"
+        }));
+        return false;
+    };
+
+    stop = function(e) {
+        socket.send(JSON.stringify({
+            direction: "stop"
+        }));
+        return false;
+    };
+
+    go_right = function(e) {
+        socket.send(JSON.stringify({
+            direction: "e"
+        }));
+        return false;
+    };
+
+    go_sw = function(e) {
+        socket.send(JSON.stringify({
+            direction: "sw"
+        }));
+        return false;
+    };
+
+    go_backward = function(e) {
+        socket.send(JSON.stringify({
+            direction: "s"
+        }));
+        return false;
+    };
+
+    go_se = function(e) {
+        socket.send(JSON.stringify({
+            direction: "se"
+        }));
+        return false;
+    };
+
+    $(window).keydown(function(e) {
+    switch (e.keyCode) {
+        case 37: // left
+            go_left();
+            return false;
+        case 38: // up
+            go_forward();
+            return false;
+        case 39: // right
+            go_right();
+            return false;
+        case 40: // down
+            go_backward();
+            return false;
+        case 32: // space
+            stop();
+            return false;
+/*
+        default:
+            $('#result').text(e.keyCode);
+            return false;
+*/
+    }
+    return; //using "return" other attached events will execute
+    });
+        </script>
+    </head>
+    <body>
+        <img src="/video_stream" style="height: 480px; width: 640px;"/>
+        <div id="slider" style="height: 20px; width: 640px;"></div>
+        <div>
+            <div>
+                <input type="button" name="nw" value="&#8598;">
+                <input type="button" name="n" value="&#8593;">
+                <input type="button" name="ne" value="&#8599;">
+            </div>
+            <div>
+                <input type="button" name="w" value="&#8592;">
+                <input type="button" name="stop" value="&#215;">
+                <input type="button" name="e" value="&#8594;">
+            </div>
+            <div>
+                <input type="button" name="sw" value="&#8601;">
+                <input type="button" name="s" value="&#8595;">
+                <input type="button" name="se" value="&#8600;">
+            </div>
+            <div id="messages" style="height:200px;background:black;color:white;"></div>
+            <script>
+                var messageBox = document.getElementById("messages");
+                var socket;
+                if ("WebSocket" in window) {
+                    messageBox.innerHTML = "WebSocket is supported by your Browser!";
+                    socket = new WebSocket("ws://localhost:8888/socket?id=" + uid);
+                    socket.onopen = function() {
+                        socket.send(JSON.stringify({
+                            ping: uid
+                        }));
+                    };
+                    socket.onmessage = function (evt) {
+                        messageBox.innerHTML = "Message received:<br/>" + evt.data + "<br/>" + messageBox.innerHTML;
+                    };
+                    socket.onclose = function() {
+                        messageBox.innerHTML = "Connection is closed.<br/>" + messageBox.innerHTML;
+                    };
+                    $('input[name=nw]').bind('click', go_nw);
+
+                    $('input[name=n]').bind('click', go_forward);
+
+                    $('input[name=ne]').bind('click', go_ne);
+
+                    $('input[name=w]').bind('click', go_left);
+
+                    $('input[name=stop]').bind('click', stop);
+
+                    $('input[name=e]').bind('click', go_right);
+
+                    $('input[name=sw]').bind('click', go_sw);
+
+                    $('input[name=s]').bind('click', go_backward);
+
+                    $('input[name=se]').bind('click', go_se);
+
+                    $('input[name=forward]').focus();
+
+                    $('#slider').on('slidechange', function(event, ui){
+                        socket.send(JSON.stringify({
+                                speed: ui.value
+                        }))
+                        return false;
+                    });
+                } else {
+                    messageBox.innerHTML = "WebSocket NOT supported by your Browser!";
+                }
+            </script>
+    </body>
+</html>
