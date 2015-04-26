@@ -5,19 +5,25 @@
         <style>
             input, button {
                 background: #666;
-                font-size: 35px;
+                font-size: 130px;
                 font-weight: bold;
                 color: #ccc;
-                width: 50px;
-                height: 50px;
+                width: 160px;
+                height: 160px;
                 vertical-align: middle;
             }
+
+
+            #video{ float: left; }
+            #buttons{ float: right; align: center; }
+            #slider{ display: inline-block; margin-left: 40px; }
         </style>
-        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-        <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+        <script src="https://code.jquery.com/jquery-2.1.1.js"></script>
+        <script src="https://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.4/themes/flick/jquery-ui.css">
+        <script src="/static/jquery-ui-slider-pips.js"></script>
+        <link rel="stylesheet" href="/static/jquery-ui-slider-pips.css">
 	    <script type="text/javascript">
-    var url = "{{ current_url }}";
     var go_forward;
     var go_nw;
     var go_ne;
@@ -32,10 +38,15 @@
 
     $(function() {
         set_speed = $( "#slider" ).slider({
+            orientation: "vertical",
             value: 40,
             step: 5,
             min: 0,
             max: 100
+        })
+        .slider("pips", {
+            rest: "label",
+            step: "2"
         })
     });
 
@@ -130,9 +141,11 @@
         </script>
     </head>
     <body>
-        <img src="/video_stream" style="height: 480px; width: 640px;"/>
-        <div id="slider" style="height: 20px; width: 640px;"></div>
-        <div>
+        <div id="slider" style="height: 480px;"></div>
+        <div id="video">
+            <img src="/video_stream" style="height: 480px; width: 640px;"/>
+        </div>
+        <div id="buttons">
             <div>
                 <input type="button" name="nw" value="&#8598;">
                 <input type="button" name="n" value="&#8593;">
@@ -148,13 +161,14 @@
                 <input type="button" name="s" value="&#8595;">
                 <input type="button" name="se" value="&#8600;">
             </div>
+        </div>
             <div id="messages" style="height:200px;background:black;color:white;"></div>
             <script>
                 var messageBox = document.getElementById("messages");
                 var socket;
                 if ("WebSocket" in window) {
                     messageBox.innerHTML = "WebSocket is supported by your Browser!";
-                    socket = new WebSocket("ws://localhost:8888/socket?id=" + uid);
+                    socket = new WebSocket("ws://{{ host_port }}/socket?id=" + uid);
                     socket.onopen = function() {
                         socket.send(JSON.stringify({
                             ping: uid

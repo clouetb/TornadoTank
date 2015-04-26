@@ -39,7 +39,6 @@ class Tank:
 
     def __del__(self):
         log.info("Destroying pruio instance %s", self.__io)
-        print("+++ Destroy")
         pruio.pruio_destroy(self.__io)
 
     def run(self, lspeed, rspeed):
